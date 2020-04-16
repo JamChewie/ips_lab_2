@@ -9,7 +9,7 @@
 #include <iostream>
 
 namespace lab2_2 {
-
+	// Нахождение максимального значения в массиве
 	void ReducerMaxTest(int *mass_pointer, const long size)
 	{
 		cilk::reducer<cilk::op_max_index<long, int>> maximum;
@@ -20,7 +20,7 @@ namespace lab2_2 {
 		std::cout << "Maximal element = " << maximum->get_reference() 
 			<< " has index = " << maximum->get_index_reference() << std::endl;
 	}
-
+	// Нахождение минимального значения в массиве
 	void ReducerMinTest(int *mass_pointer, const long size)
 	{
 		cilk::reducer<cilk::op_min_index<long, int>> minimum;
@@ -31,7 +31,7 @@ namespace lab2_2 {
 		std::cout << "Minimal element = " << minimum->get_reference() 
 			<< " has index = " << minimum->get_index_reference() << std::endl;
 	}
-
+	// Сортировка массива по возрастанию
 	void ParallelSort(int *begin, int *end)
 	{		
 		if (begin != end)
@@ -47,27 +47,21 @@ namespace lab2_2 {
 	void run()
 	{
 		srand((unsigned)time(0));
-
-
-		__cilkrts_set_param("nworkers", "4");
-
-		long i;
+		__cilkrts_set_param("nworkers", "4");	// задаем максимальное количество потоков	
 		const long mass_size = 10000;
 		int *mass_begin, *mass_end;
 		int *mass = new int[mass_size];
-
-		for (i = 0; i < mass_size; ++i)
+		for (auto i = 0; i < mass_size; ++i)
 		{
 			mass[i] = (rand() % 25000) + 1;
 		}
-
-		mass_begin = mass;
-		mass_end = mass_begin + mass_size;
-		ReducerMaxTest(mass, mass_size);
-		ReducerMinTest(mass, mass_size);
-		ParallelSort(mass_begin, mass_end);
-		ReducerMaxTest(mass, mass_size);
-		ReducerMinTest(mass, mass_size);
+		mass_begin = mass;						// указатель на начало массива
+		mass_end = mass_begin + mass_size;		// указатель на конец массива
+		ReducerMaxTest(mass, mass_size);		// нахождение максимума до сортировка
+		ReducerMinTest(mass, mass_size);		// нахождение минимума до сортировка
+		ParallelSort(mass_begin, mass_end);		// сортировка массива
+		ReducerMaxTest(mass, mass_size);		// нахождение максимума после сортировка
+		ReducerMinTest(mass, mass_size);		// нахождение минимума после сортировка
 		delete[]mass;	
 	}
 }

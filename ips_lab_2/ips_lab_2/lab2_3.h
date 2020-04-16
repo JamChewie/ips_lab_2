@@ -10,7 +10,7 @@
 const size_t start_size = 10000;
 int *mass = new int[start_size];
 namespace lab2_3 {
-
+	// Нахождение максимального значения в массиве
 	void ReducerMaxTest(int *mass_pointer, const long size)
 	{
 		cilk::reducer<cilk::op_max_index<long, int>> maximum;
@@ -21,7 +21,7 @@ namespace lab2_3 {
 		std::cout << "Maximal element = " << maximum->get_reference()
 			<< " has index = " << maximum->get_index_reference() << std::endl;
 	}
-
+	// Нахождение минимального значения в массиве
 	void ReducerMinTest(int *mass_pointer, const long size)
 	{
 		cilk::reducer<cilk::op_min_index<long, int>> minimum;
@@ -32,7 +32,7 @@ namespace lab2_3 {
 		std::cout << "Minimal element = " << minimum->get_reference()
 			<< " has index = " << minimum->get_index_reference() << std::endl;
 	}
-
+	// Сортировка массива по возрастанию
 	void ParallelSort(int *begin, int *end)
 	{
 		if (begin != end)
@@ -45,7 +45,7 @@ namespace lab2_3 {
 			cilk_sync;
 		}
 	}
-
+	// Изменение размера массива
 	size_t Resize(int sz) {
 		size_t newSize = start_size * sz;
 		int *newArray = new int[newSize];
@@ -60,31 +60,30 @@ namespace lab2_3 {
 
 	void run()
 	{
-
 		srand((unsigned)time(0));
-		__cilkrts_set_param("nworkers", "4");
+		__cilkrts_set_param("nworkers", "4");										// задаем максимальное количество потоков
 		int size_mult[3] = { 10,50,100 };		
 		int *mass_begin, *mass_end;
 		for (size_t i = 0; i < 3; i++)
 		{
 			std::cout << "Array size = " << start_size*size_mult[i] << std::endl;
 			Resize(size_mult[i]);
-			mass_begin = mass;
-			mass_end = mass_begin + start_size * size_mult[i];
+			mass_begin = mass;														// указатель на начало массива
+			mass_end = mass_begin + start_size * size_mult[i];						// указатель на конец массива
 			std::cout << "Before sort " << std::endl;
-			ReducerMaxTest(mass, start_size * size_mult[i]);
-			ReducerMinTest(mass, start_size * size_mult[i]);
-			auto t1 = std::chrono::high_resolution_clock::now();
-			ParallelSort(mass_begin, mass_end);
-			auto t2 = std::chrono::high_resolution_clock::now();
-			std::chrono::duration<double> duration = (t2 - t1);
-			std::cout << "Sort duration is: " << duration.count() << " seconds" << std::endl;
+			ReducerMaxTest(mass, start_size * size_mult[i]);						// нахождение максимума до сортировка
+			ReducerMinTest(mass, start_size * size_mult[i]);						// нахождение минимума до сортировка
+			auto t1 = std::chrono::high_resolution_clock::now();					// начала отсчета времени сортировки
+			ParallelSort(mass_begin, mass_end);										// сортировка массива
+			auto t2 = std::chrono::high_resolution_clock::now();					// конец отсчета времени сортировки
+			std::chrono::duration<double> duration = (t2 - t1);						// вычисление времени сортировки
+			std::cout << "Sort duration is: " << duration.count()	
+				<< " seconds" << std::endl;
 			std::cout << "After sort " << std::endl;
-			ReducerMaxTest(mass, start_size * size_mult[i]);
-			ReducerMinTest(mass, start_size * size_mult[i]);
+			ReducerMaxTest(mass, start_size * size_mult[i]);						// нахождение максимума после сортировка
+			ReducerMinTest(mass, start_size * size_mult[i]);						// нахождение минимума после сортировка
 			std::cout << std::endl;
-		}	
-		
+		}		
 		delete[]mass;
 	}
 }
